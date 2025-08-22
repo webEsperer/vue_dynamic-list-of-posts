@@ -30,9 +30,19 @@
       :error="commentError"
     />
 
+    <div v-if="submitError" class="notification is-danger">
+      {{ submitError }}
+      <button type="button" class="delete" @click="submitError = ''"></button>
+    </div>
+
     <div class="field is-grouped mt-3">
       <div class="control">
-        <button type="submit" class="button is-link" :disabled="loading">
+        <button
+          type="submit"
+          class="button is-link"
+          :class="{ 'is-loading': loading }"
+          :disabled="loading"
+        >
           Add Comment
         </button>
       </div>
@@ -64,6 +74,7 @@ const authorName = ref('')
 const authorEmail = ref('')
 const comment = ref('')
 const loading = ref(false)
+const submitError = ref('')
 
 const authorNameError = ref('')
 const authorEmailError = ref('')
@@ -77,14 +88,21 @@ onMounted(() => {
   }
 })
 
-watch(authorName, () => { authorNameError.value = '' })
-watch(authorEmail, () => { authorEmailError.value = '' })
-watch(comment, () => { commentError.value = '' })
+watch(authorName, () => {
+  authorNameError.value = ''
+})
+watch(authorEmail, () => {
+  authorEmailError.value = ''
+})
+watch(comment, () => {
+  commentError.value = ''
+})
 
 const submitComment = async () => {
   authorNameError.value = ''
   authorEmailError.value = ''
   commentError.value = ''
+  submitError.value = ''
 
   if (!authorName.value.trim()) authorNameError.value = 'Name is required'
   if (!authorEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authorEmail.value))
@@ -99,13 +117,14 @@ const submitComment = async () => {
       props.postId,
       authorName.value,
       authorEmail.value,
-      comment.value
+      comment.value,
     )
     emit('submit', newComment)
 
     comment.value = ''
   } catch (error) {
     console.error('Failed to add comment:', error)
+    submitError.value = 'Failed to submit comment. Please try again.'
   } finally {
     loading.value = false
   }
@@ -118,5 +137,6 @@ const clearForm = () => {
   authorNameError.value = ''
   authorEmailError.value = ''
   commentError.value = ''
+  submitError.value = ''
 }
 </script>
