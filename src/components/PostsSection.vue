@@ -101,10 +101,14 @@ export default {
       isSidebarOpen.value = true
     }
 
-    const onPostAdded = (newPost) => {
-      posts.value.unshift(newPost)
-      isSidebarOpen.value = false
-    }
+const onPostAdded = (newPost) => {
+  posts.value.unshift(newPost)
+  selectedPost.value = newPost
+  isEditing.value = false
+  sidebarContent.value = 'post'
+  isSidebarOpen.value = true
+}
+
 
     const onPostUpdated = (updatedPost) => {
       const index = posts.value.findIndex((p) => p.id === updatedPost.id)
