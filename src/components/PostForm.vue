@@ -18,7 +18,7 @@
       v-model="body"
       :error="bodyError"
     />
-
+    <p v-if="submitError" class="has-text-danger mt-2">{{ submitError }}</p>
     <div class="field is-grouped">
       <button type="submit" class="button is-link">
         {{ props.post ? 'Save' : 'Create' }}
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import InputField from './InputField.vue'
 import TextareaField from './TextareaField.vue'
 import { addNewPost, updatePost } from '../server'
@@ -44,20 +44,30 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'postAdded'])
+const emit = defineEmits(['close', 'postAdded', 'postUpdated'])
 
 const title = ref(props.post ? props.post.title : '')
 const body = ref(props.post ? props.post.body : '')
 
 const titleError = ref('')
 const bodyError = ref('')
+const submitError = ref('')
+const loading = ref(false)
 
+watch(title, () => {
+  if (titleError.value) titleError.value = ''
+})
+watch(body, () => {
+  if (bodyError.value) bodyError.value = ''
+})
 
 const submitForm = async () => {
   titleError.value = title.value.trim() === '' ? 'Title is required' : ''
   bodyError.value = body.value.trim() === '' ? 'Body is required' : ''
+  submitError.value = ''
 
   if (titleError.value || bodyError.value) return
+  loading.value = true
 
   try {
     if (props.post) {
@@ -73,6 +83,7 @@ const submitForm = async () => {
     body.value = ''
   } catch (e) {
     console.error('Failed to submit post:', e)
+    submitError.value = 'Failed to submit post. Please try again.'
   }
 }
 </script>
